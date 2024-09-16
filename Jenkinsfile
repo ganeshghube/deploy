@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Cleanup Repo
-        sh 'rm -rf'
+        sh 'sudo rm -rf *'
     }
 
     stages {
