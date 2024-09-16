@@ -98,18 +98,23 @@ pipeline {
         stage('SSH Key Distribution') {
             steps {
                 script {
-                    // Using ssh-keyscan to ensure the host is known
-                    sh 'cd /root/.ssh'
-                    // Perform ssh-copy-id using the provided SSH key and user
-                    def sshKeyExitCode = sh(script: """
-                        sshpass -p ${params.ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.LINUX_USER}@${params.SERVER_IP}
-                    """, returnStatus: true)
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-key-id', keyFileVariable: 'SSH_PRIVATE_KEY'), 
+                                     usernamePassword(credentialsId: 'linuxpass', usernameVariable: 'LINUX_USER', passwordVariable: 'ROOT_PASS')]) {
+                        // Using ssh-keyscan to ensure the host is known
+                        sh """
+                            ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
+                        """
+                        
+                        // Perform ssh-copy-id using the provided SSH key and user
+                        def sshKeyExitCode = sh(script: """
+                            sshpass -p ${ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${LINUX_USER}@${params.SERVER_IP}
+                        """, returnStatus: true)
 
-                    if (sshKeyExitCode != 0) {
-                        error("Failed to distribute SSH key to ${params.SERVER_NAME}")
-                    } else {
-                        echo "SSH key successfully distributed to ${params.SERVER_NAME}"
-                    }
+                        if (sshKeyExitCode != 0) {
+                            error("Failed to distribute SSH key to ${params.SERVER_NAME}")
+                        } else {
+                            echo "SSH key successfully distributed to ${params.SERVER_NAME}"
+                        }
                 }
             }
         }
