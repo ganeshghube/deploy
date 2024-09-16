@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Use your Jenkins credential ID here (e.g., 'github-creds')
-        //GITHUB_CREDENTIALS = credentials('github-creds')
-        sh 'pwd'
+        // Cleanup Repo
+        sh 'rm -rf'
     }
 
     stages {
