@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 // Checkout the code from GitHub using credentials
-                git branch: 'main', url: 'https://github.com/ganeshghube/deploy.git', credentialsId: GITHUB_CREDENTIALS
+                git clone 'https://github.com/ganeshghube/deploy.git'
             }
         }
 
