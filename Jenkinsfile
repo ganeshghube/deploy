@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'SERVER_NAME', defaultValue: 'new_server', description: 'Name of the server to add to Ansible inventory and /etc/hosts')
-        string(name: 'SERVER_IP', defaultValue: '192.168.1.100', description: 'IP address of the server')
+        string(name: 'SERVER_NAME', defaultValue: 'apimanager', description: 'Name of the server to add to Ansible inventory and /etc/hosts')
+        string(name: 'SERVER_IP', defaultValue: '192.168.1.250', description: 'IP address of the server')
         //string(name: 'ANSIBLE_USER', defaultValue: 'admin', description: 'Ansible user for the server')
     }
 
