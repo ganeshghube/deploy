@@ -4,8 +4,6 @@ pipeline {
     environment {
         GITHUB_TOKEN = credentials('jenkins-user')
     }
-    
-   
     stage('clean') {
         steps {
              // Add your build steps here
