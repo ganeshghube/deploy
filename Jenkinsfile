@@ -102,16 +102,16 @@ pipeline {
                     """
                     
                     sh('set +x sudo sshpass -p $LINUX_PASS ssh-copy-id -i /root/.ssh/id_rsa.pub -f $LINUX_USER@$SERVER_IP')
-                    // Perform ssh-copy-id using the provided SSH key and user
-                   // def sshKeyExitCode = sh(script: """
-                   //     sshpass -p ${LINUX_PASS} ssh-copy-id -i /root/.ssh/id_rsa.pub ${LINUX_USER}@${params.SERVER_IP}
-                   // """, returnStatus: true)
+                //     Perform ssh-copy-id using the provided SSH key and user
+                //     def sshKeyExitCode = sh(script: """
+                //         sshpass -p ${LINUX_PASS} ssh-copy-id -i /root/.ssh/id_rsa.pub ${LINUX_USER}@${params.SERVER_IP}
+                //     """, returnStatus: true)
 
-                    if (sshKeyExitCode != 0) {
-                        error("Failed to distribute SSH key to ${params.SERVER_IP}")
-                    } else {
-                        echo "SSH key successfully distributed to ${params.SERVER_IP}"
-                    }
+                //     if (sshKeyExitCode != 0) {
+                //         error("Failed to distribute SSH key to ${params.SERVER_IP}")
+                //     } else {
+                //         echo "SSH key successfully distributed to ${params.SERVER_IP}"
+                //     }
                 }
             }
         }
