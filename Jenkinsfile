@@ -101,7 +101,7 @@ pipeline {
                     sh 'cd /root/.ssh'
                     // Perform ssh-copy-id using the provided SSH key and user
                     def sshKeyExitCode = sh(script: """
-                        sshpass -p ${ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.LINUX_USER}@${params.SERVER_IP}
+                        sshpass -p ${params.ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.LINUX_USER}@${params.SERVER_IP}
                     """, returnStatus: true)
 
                     if (sshKeyExitCode != 0) {
