@@ -98,7 +98,7 @@ pipeline {
             steps {
                 script {
                     // Using ssh-keyscan to ensure the host is known
-                    sh 'cd /root/.ssh'
+                    //sh 'cd /root/.ssh'
                     // Perform ssh-copy-id using the provided SSH key and user
                     def sshKeyExitCode = sh(script: """
                         sshpass -p ${params.ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.LINUX_USER}@${params.SERVER_IP}
