@@ -1,8 +1,15 @@
 pipeline {
     agent any
     
+    parameters {
+        string(name: 'SERVER_NAME', defaultValue: 'new_server', description: 'Name of the server to add to Ansible inventory')
+        string(name: 'SERVER_IP', defaultValue: '192.168.1.100', description: 'IP address of the server')
+        string(name: 'ANSIBLE_USER', defaultValue: 'admin', description: 'Ansible user for the server')
+    }
+    
     environment {
         GITHUB_TOKEN = credentials('jenkins-user')
+        ANSIBLE_INVENTORY = '/etc/ansible/hosts'
     }
     
     stages {
@@ -19,23 +26,37 @@ pipeline {
             }
         }
         
+        stage('Update Ansible Inventory') {
+            steps {
+                script {
+                    def newLine = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP} ansible_user=${params.ANSIBLE_USER}"
+                    
+                    sh """
+                    if [ -w ${ANSIBLE_INVENTORY} ]; then
+                        sed -i '\$d' ${ANSIBLE_INVENTORY} && echo "${newLine}" >> ${ANSIBLE_INVENTORY}
+                    else
+                        echo "Need sudo rights to modify ${ANSIBLE_INVENTORY}"
+                        sudo sed -i '\$d' ${ANSIBLE_INVENTORY} && echo "${newLine}" | sudo tee -a ${ANSIBLE_INVENTORY}
+                    fi
+                    """
+                }
+            }
+        }
+        
         stage('Build') {
             steps {
-                // Add your build steps here
                 sh 'echo "Building the project"'
             }
         }
         
         stage('Test') {
             steps {
-                // Add your test steps here
                 sh 'echo "Running tests"'
             }
         }
         
         stage('Deploy') {
             steps {
-                // Add your deployment steps here
                 sh 'echo "Deploying the application"'
             }
         }
@@ -45,6 +66,5 @@ pipeline {
         success {
             echo 'Pipeline executed successfully!'
         }
-        
     }
 }
