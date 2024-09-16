@@ -10,6 +10,7 @@ pipeline {
     environment {
         GITHUB_TOKEN = credentials('jenkins-user')
         ANSIBLE_INVENTORY = '/etc/ansible/hosts'
+        HOSTS_INVENTORY = '/etc/hosts'
     }
     
     stages {
@@ -53,6 +54,38 @@ pipeline {
 
                     if (exitCode != 0) {
                         error("Failed to update Ansible inventory")
+                    }
+                }
+            }
+        }
+
+                stage('Update Hosts File Inventory') {
+            steps {
+                script {
+                    def newLine = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP}"
+                    
+                    def exitCode = sh(script: """
+                        if [ -w ${HOSTS_INVENTORY} ]; then
+                            if grep -q "${params.SERVER_NAME}" ${HOSTS_INVENTORY}; then
+                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${HOSTS_INVENTORY}"
+                                exit 1
+                            else
+                                echo "${newLine}" >> ${HOSTS_INVENTORY}
+                                echo "Successfully added ${params.SERVER_NAME} to ${HOSTS_INVENTORY}"
+                            fi
+                        else
+                            if sudo grep -q "${params.SERVER_NAME}" ${HOSTS_INVENTORY}; then
+                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${HOSTS_INVENTORY}"
+                                exit 1
+                            else
+                                echo "${newLine}" | sudo tee -a ${HOSTS_INVENTORY}
+                                echo "Successfully added ${params.SERVER_NAME} to ${HOSTS_INVENTORY}"
+                            fi
+                        fi
+                    """, returnStatus: true)
+
+                    if (exitCode != 0) {
+                        error("Failed to update Hosts inventory")
                     }
                 }
             }
