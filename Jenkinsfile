@@ -9,6 +9,8 @@ pipeline {
     
     environment {
         GITHUB_TOKEN = credentials('jenkins-user')
+        LINUX_PASS = credentials('linuxpass')
+        LINUX_USER = credentials('linuxusr')
         ANSIBLE_INVENTORY = '/etc/ansible/hosts'
         HOSTS_INVENTORY = '/etc/hosts'
     }
@@ -86,6 +88,28 @@ pipeline {
 
                     if (exitCode != 0) {
                         error("Failed to update Hosts inventory")
+                    }
+                }
+            }
+        }
+
+                stage('SSH Key Distribution') {
+            steps {
+                script {
+                    // Using ssh-keyscan to ensure the host is known
+                    sh """
+                        ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
+                    """
+                    
+                    // Perform ssh-copy-id using the provided SSH key and user
+                    def sshKeyExitCode = sh(script: """
+                        sshpass -p ${LINUX_PASS} ssh-copy-id -i ./root/.ssh/id_rsa.pub ${LINUX_USER}@${params.SERVER_IP}
+                    """, returnStatus: true)
+
+                    if (sshKeyExitCode != 0) {
+                        error("Failed to distribute SSH key to ${params.SERVER_NAME}")
+                    } else {
+                        echo "SSH key successfully distributed to ${params.SERVER_NAME}"
                     }
                 }
             }
