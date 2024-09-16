@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                sshagent(['git']) {
+                sshagent(['root']) {
                     // Replace with your Git repository's SSH URL
                     git branch: 'main', url: 'git@github.com:ganeshghube/deploy.git'
                 }
