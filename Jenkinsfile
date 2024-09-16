@@ -2,14 +2,14 @@ pipeline {
     agent any
     
     environment {
-        GITHUB_CREDENTIALS = credentials('root')
+        GITHUB_CREDENTIALS = credentials('git')
     }
     
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: 'root',
+                    credentialsId: 'git',
                     url: 'https://github.com/ganeshghube/deploy.git'
             }
         }
