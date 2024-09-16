@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-         stage('Build') {
+         stage('Clean Repo') {
             steps {
                 sh 'sudo rm -rf *'
             }
