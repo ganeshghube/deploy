@@ -12,6 +12,8 @@ pipeline {
         ANSIBLE_INVENTORY = '/etc/ansible/hosts'     // Path to Ansible inventory
         HOSTS_FILE = '/etc/hosts'                    // Path to /etc/hosts file
         SSH_PRIVATE_KEY = credentials('ssh-key-id')  // Jenkins credential ID for SSH private key
+        ROOT_PASS = credentials('linuxpass')   // LinuxSystem Password
+        LINUX_USER = credentials('linuxusr')   // LinuxSystem user
     }
 
     stages {
@@ -97,13 +99,9 @@ pipeline {
                 script {
                     // Using ssh-keyscan to ensure the host is known
                     sh 'cd /root/.ssh'
-                    sh """
-                        ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
-                    """
-                    
                     // Perform ssh-copy-id using the provided SSH key and user
                     def sshKeyExitCode = sh(script: """
-                        sshpass -p 'redhat' ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.ANSIBLE_USER}@${params.SERVER_IP}
+                        sshpass -p ${ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.LINUX_USER}@${params.SERVER_IP}
                     """, returnStatus: true)
 
                     if (sshKeyExitCode != 0) {
