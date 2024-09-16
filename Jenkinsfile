@@ -62,7 +62,7 @@ pipeline {
                 stage('Update Hosts File Inventory') {
             steps {
                 script {
-                    def newLine = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP}"
+                    def newLine = "${params.SERVER_NAME} ${params.SERVER_IP}"
                     
                     def exitCode = sh(script: """
                         if [ -w ${HOSTS_INVENTORY} ]; then
