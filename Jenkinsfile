@@ -4,16 +4,12 @@ pipeline {
     parameters {
         string(name: 'SERVER_NAME', defaultValue: 'apimanager', description: 'Name of the server to add to Ansible inventory and /etc/hosts')
         string(name: 'SERVER_IP', defaultValue: '192.168.1.250', description: 'IP address of the server')
-        //string(name: 'ANSIBLE_USER', defaultValue: 'admin', description: 'Ansible user for the server')
     }
 
     environment {
         GITHUB_TOKEN = credentials('jenkins-user')   // GitHub access token for repo checkout
         ANSIBLE_INVENTORY = '/etc/ansible/hosts'     // Path to Ansible inventory
         HOSTS_FILE = '/etc/hosts'                    // Path to /etc/hosts file
-        SSH_PRIVATE_KEY = credentials('ssh-key-id')  // Jenkins credential ID for SSH private key
-        ROOT_PASS = credentials('linuxpass')   // LinuxSystem Password
-        LINUX_USER = credentials('linuxusr')   // LinuxSystem user
     }
 
     stages {
@@ -36,21 +32,21 @@ pipeline {
                     def newInventoryEntry = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP}"
                     
                     def inventoryExitCode = sh(script: """
-                        if [ -w ${ANSIBLE_INVENTORY} ]; then
-                            if grep -q "^${params.SERVER_NAME}" ${ANSIBLE_INVENTORY}; then
-                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${ANSIBLE_INVENTORY}"
+                        if [ -w ${ANISBLE_INVENTORY} ]; then
+                            if grep -q "^${params.SERVER_NAME}" ${ANISBLE_INVENTORY}; then
+                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${ANISBLE_INVENTORY}"
                                 exit 1
                             else
-                                echo "${newInventoryEntry}" >> ${ANSIBLE_INVENTORY}
-                                echo "Successfully added ${params.SERVER_NAME} to ${ANSIBLE_INVENTORY}"
+                                echo "${newInventoryEntry}" >> ${ANISBLE_INVENTORY}
+                                echo "Successfully added ${params.SERVER_NAME} to ${ANISBLE_INVENTORY}"
                             fi
                         else
-                            if sudo grep -q "^${params.SERVER_NAME}" ${ANSIBLE_INVENTORY}; then
-                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${ANSIBLE_INVENTORY}"
+                            if sudo grep -q "^${params.SERVER_NAME}" ${ANISBLE_INVENTORY}; then
+                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${ANISBLE_INVENTORY}"
                                 exit 1
                             else
-                                echo "${newInventoryEntry}" | sudo tee -a ${ANSIBLE_INVENTORY}
-                                echo "Successfully added ${params.SERVER_NAME} to ${ANSIBLE_INVENTORY}"
+                                echo "${newInventoryEntry}" | sudo tee -a ${ANISBLE_INVENTORY}
+                                echo "Successfully added ${params.SERVER_NAME} to ${ANISBLE_INVENTORY}"
                             fi
                         fi
                     """, returnStatus: true)
@@ -97,17 +93,23 @@ pipeline {
         stage('SSH Key Distribution') {
             steps {
                 script {
-                    // Using ssh-keyscan to ensure the host is known
-                    //sh 'cd /root/.ssh'
-                    // Perform ssh-copy-id using the provided SSH key and user
-                    def sshKeyExitCode = sh(script: """
-                        sshpass -p ${params.ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.LINUX_USER}@${params.SERVER_IP}
-                    """, returnStatus: true)
+                    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-key-id', keyFileVariable: 'SSH_PRIVATE_KEY'), 
+                                     usernamePassword(credentialsId: 'linuxpass', usernameVariable: 'LINUX_USER', passwordVariable: 'ROOT_PASS')]) {
+                        // Using ssh-keyscan to ensure the host is known
+                        sh """
+                            ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
+                        """
+                        
+                        // Perform ssh-copy-id using the provided SSH key and user
+                        def sshKeyExitCode = sh(script: """
+                            sshpass -p ${ROOT_PASS} ssh-copy-id -i ${SSH_PRIVATE_KEY} ${LINUX_USER}@${params.SERVER_IP}
+                        """, returnStatus: true)
 
-                    if (sshKeyExitCode != 0) {
-                        error("Failed to distribute SSH key to ${params.SERVER_NAME}")
-                    } else {
-                        echo "SSH key successfully distributed to ${params.SERVER_NAME}"
+                        if (sshKeyExitCode != 0) {
+                            error("Failed to distribute SSH key to ${params.SERVER_NAME}")
+                        } else {
+                            echo "SSH key successfully distributed to ${params.SERVER_NAME}"
+                        }
                     }
                 }
             }
