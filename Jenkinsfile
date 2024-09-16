@@ -2,15 +2,14 @@ pipeline {
     agent any
     
     environment {
-        GITHUB_CREDENTIALS = credentials('git')
+        GITHUB_TOKEN = credentials('jenkins-user')
     }
     
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: 'git',
-                    url: 'https://github.com/ganeshghube/deploy.git'
+                    url: "https://${GITHUB_TOKEN}@github.com/ganeshghube/deploy.git
             }
         }
         
