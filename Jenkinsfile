@@ -108,9 +108,9 @@ pipeline {
                    // """, returnStatus: true)
 
                     if (sshKeyExitCode != 0) {
-                        error("Failed to distribute SSH key to ${params.SERVER_NAME}")
+                        error("Failed to distribute SSH key to ${params.SERVER_IP}")
                     } else {
-                        echo "SSH key successfully distributed to ${params.SERVER_NAME}"
+                        echo "SSH key successfully distributed to ${params.SERVER_IP}"
                     }
                 }
             }
