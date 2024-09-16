@@ -15,7 +15,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: "https://${GITHUB_TOKEN}@github.com/ganeshghube/deploy.git
+                    url: "https://${GITHUB_TOKEN}@github.com/ganeshghube/deploy.git"
             }
         }
         
