@@ -96,6 +96,7 @@ pipeline {
             steps {
                 script {
                     // Using ssh-keyscan to ensure the host is known
+                    sh 'cd /root/.ssh'
                     sh """
                         ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
                     """
