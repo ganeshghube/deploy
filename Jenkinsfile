@@ -1,37 +1,47 @@
 pipeline {
     agent any
-
+    
+    environment {
+        GITHUB_CREDENTIALS = credentials('root')
+    }
+    
     stages {
-         stage('Clean Repo') {
+        stage('Checkout') {
             steps {
-                sh 'sudo rm -rf *'
+                git branch: 'main',
+                    credentialsId: 'root',
+                    url: 'https://github.com/ganeshghube/deploy.git'
             }
         }
-        stage('Checkout Code') {
-            steps {
-                sshagent(['root']) {
-                    // Replace with your Git repository's SSH URL
-                    git branch: 'main', url: 'git@github.com:ganeshghube/deploy.git'
-                }
-            }
-        }
-
+        
         stage('Build') {
             steps {
-                sh 'pwd'
+                // Add your build steps here
+                sh 'echo "Building the project"'
             }
         }
-
+        
         stage('Test') {
             steps {
-                sh 'pwd'
+                // Add your test steps here
+                sh 'echo "Running tests"'
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                // Add your deployment steps here
+                sh 'echo "Deploying the application"'
             }
         }
     }
     
     post {
-        always {
-            echo 'Pipeline completed.'
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline execution failed.'
         }
     }
 }
