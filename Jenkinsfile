@@ -1,11 +1,11 @@
+# Jenkins with GitHub Integration Pipeline Example
 pipeline {
-
   agent any
   stages {
-    stage('Cloning Gitt') {
+    stage('GitHub checkout') {
       steps {
-        sh "rm -rf *"
-        sh "git clone https://github.com/ganeshghube/deploy.git"
+        git 'https://github.com/learn-devops-fast/rps-ant.git'
+        sh 'ant clean compile test package war'
       }
     }
   }
