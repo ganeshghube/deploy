@@ -31,14 +31,29 @@ pipeline {
                 script {
                     def newLine = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP} ansible_user=${params.ANSIBLE_USER}"
                     
-                    sh """
-                    if [ -w ${ANSIBLE_INVENTORY} ]; then
-                        sed -i '\$d' ${ANSIBLE_INVENTORY} && echo "${newLine}" >> ${ANSIBLE_INVENTORY}
-                    else
-                        echo "Need sudo rights to modify ${ANSIBLE_INVENTORY}"
-                        sudo sed -i '\$d' ${ANSIBLE_INVENTORY} && echo "${newLine}" | sudo tee -a ${ANSIBLE_INVENTORY}
-                    fi
-                    """
+                    def exitCode = sh(script: """
+                        if [ -w ${ANSIBLE_INVENTORY} ]; then
+                            if grep -q "${params.SERVER_NAME}" ${ANSIBLE_INVENTORY}; then
+                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${ANSIBLE_INVENTORY}"
+                                exit 1
+                            else
+                                echo "${newLine}" >> ${ANSIBLE_INVENTORY}
+                                echo "Successfully added ${params.SERVER_NAME} to ${ANSIBLE_INVENTORY}"
+                            fi
+                        else
+                            if sudo grep -q "${params.SERVER_NAME}" ${ANSIBLE_INVENTORY}; then
+                                echo "Error: Entry for ${params.SERVER_NAME} already exists in ${ANSIBLE_INVENTORY}"
+                                exit 1
+                            else
+                                echo "${newLine}" | sudo tee -a ${ANSIBLE_INVENTORY}
+                                echo "Successfully added ${params.SERVER_NAME} to ${ANSIBLE_INVENTORY}"
+                            fi
+                        fi
+                    """, returnStatus: true)
+
+                    if (exitCode != 0) {
+                        error("Failed to update Ansible inventory")
+                    }
                 }
             }
         }
@@ -65,6 +80,9 @@ pipeline {
     post {
         success {
             echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline execution failed.'
         }
     }
 }
