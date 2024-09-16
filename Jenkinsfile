@@ -4,7 +4,6 @@ pipeline {
     parameters {
         string(name: 'SERVER_NAME', defaultValue: 'new_server', description: 'Name of the server to add to Ansible inventory')
         string(name: 'SERVER_IP', defaultValue: '192.168.1.100', description: 'IP address of the server')
-        string(name: 'ANSIBLE_USER', defaultValue: 'admin', description: 'Ansible user for the server')
     }
     
     environment {
@@ -29,7 +28,7 @@ pipeline {
         stage('Update Ansible Inventory') {
             steps {
                 script {
-                    def newLine = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP} ansible_user=${params.ANSIBLE_USER}"
+                    def newLine = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP}"
                     
                     def exitCode = sh(script: """
                         if [ -w ${ANSIBLE_INVENTORY} ]; then
