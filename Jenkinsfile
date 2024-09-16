@@ -4,14 +4,14 @@ pipeline {
     environment {
         GITHUB_TOKEN = credentials('jenkins-user')
     }
-    stage('clean') {
-        stage('clean') {
-            steps {
-                // Add your build steps here
-                sh 'rm -rf *'
-                }
-            }
+    
     stages {
+        stage('Clean') {
+            steps {
+                cleanWs()
+            }
+        }
+        
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -49,5 +49,4 @@ pipeline {
             echo 'Pipeline execution failed.'
         }
     }
-}
 }
