@@ -11,6 +11,7 @@ pipeline {
         GITHUB_TOKEN = credentials('jenkins-user')   // GitHub access token for repo checkout
         ANSIBLE_INVENTORY = '/etc/ansible/hosts'     // Path to Ansible inventory
         HOSTS_FILE = '/etc/hosts'                    // Path to /etc/hosts file
+        SSH_PRIVATE_KEY = credentials('ssh-key-id')  // Jenkins credential ID for SSH private key
     }
 
     stages {
@@ -30,7 +31,7 @@ pipeline {
         stage('Update Ansible Inventory') {
             steps {
                 script {
-                    def newInventoryEntry = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP} ansible_user=${params.ANSIBLE_USER}"
+                    def newInventoryEntry = "${params.SERVER_NAME} ansible_host=${params.SERVER_IP}"
                     
                     def inventoryExitCode = sh(script: """
                         if [ -w ${ANSIBLE_INVENTORY} ]; then
@@ -86,6 +87,28 @@ pipeline {
 
                     if (hostsExitCode != 0) {
                         error("Failed to update /etc/hosts")
+                    }
+                }
+            }
+        }
+
+        stage('SSH Key Distribution') {
+            steps {
+                script {
+                    // Using ssh-keyscan to ensure the host is known
+                    sh """
+                        ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
+                    """
+                    
+                    // Perform ssh-copy-id using the provided SSH key and user
+                    def sshKeyExitCode = sh(script: """
+                        sshpass -p 'redhat' ssh-copy-id -i ${SSH_PRIVATE_KEY} ${params.ANSIBLE_USER}@${params.SERVER_IP}
+                    """, returnStatus: true)
+
+                    if (sshKeyExitCode != 0) {
+                        error("Failed to distribute SSH key to ${params.SERVER_NAME}")
+                    } else {
+                        echo "SSH key successfully distributed to ${params.SERVER_NAME}"
                     }
                 }
             }
