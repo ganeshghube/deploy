@@ -101,7 +101,7 @@ pipeline {
                         ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
                     """
                     
-                    sh('sudo sshpass -p $LINUX_PASS -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=5 -T ssh-copy-id -i /root/.ssh/id_rsa.pub $LINUX_USER@$SERVER_IP')
+                    sh('sudo sshpass -p $LINUX_PASS ssh -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=1 -T ssh-copy-id -i /root/.ssh/id_rsa.pub $LINUX_USER@$SERVER_IP')
                     // Perform ssh-copy-id using the provided SSH key and user
                    // def sshKeyExitCode = sh(script: """
                    //     sshpass -p ${LINUX_PASS} ssh-copy-id -i /root/.ssh/id_rsa.pub ${LINUX_USER}@${params.SERVER_IP}
