@@ -5,11 +5,12 @@ pipeline {
         GITHUB_TOKEN = credentials('jenkins-user')
     }
     stage('clean') {
-        steps {
-             // Add your build steps here
-             sh 'rm -rf *'
+        stage('clean') {
+            steps {
+                // Add your build steps here
+                sh 'rm -rf *'
+                }
             }
-        }
     stages {
         stage('Checkout') {
             steps {
