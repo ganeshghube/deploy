@@ -1,10 +1,12 @@
 pipeline {
     agent any
 
-    environment {
-        // Cleanup Repo
-        sh 'sudo rm -rf *'
-    }
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir() // Clean workspace to avoid corrupted files
+            }
+        }
 
     stages {
         stage('Checkout Code') {
