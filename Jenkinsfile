@@ -101,10 +101,11 @@ pipeline {
                         ssh-keyscan -H ${params.SERVER_IP} >> ~/.ssh/known_hosts
                     """
                     
+                    sh('sshpass -p $LINUX_PASS ssh-copy-id -i ./root/.ssh/id_rsa.pub $LINUX_USER@$params.SERVER_IP')
                     // Perform ssh-copy-id using the provided SSH key and user
-                    def sshKeyExitCode = sh(script: """
-                        sshpass -p ${LINUX_PASS} ssh-copy-id -i ./root/.ssh/id_rsa.pub ${LINUX_USER}@${params.SERVER_IP}
-                    """, returnStatus: true)
+                   // def sshKeyExitCode = sh(script: """
+                   //     sshpass -p ${LINUX_PASS} ssh-copy-id -i ./root/.ssh/id_rsa.pub ${LINUX_USER}@${params.SERVER_IP}
+                   // """, returnStatus: true)
 
                     if (sshKeyExitCode != 0) {
                         error("Failed to distribute SSH key to ${params.SERVER_NAME}")
